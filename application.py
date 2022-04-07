@@ -41,9 +41,7 @@ filename = f'{current_dir}/basic_news_logistic_regression.sav'
 model = pickle.load(open(filename, 'rb'))
 
 
-
 app = Flask(__name__)
-
 
 
 @app.route('/')
@@ -75,4 +73,4 @@ def home():
 
 
 if __name__ == "__main__":
-    app.run(host = '0.0.0.0', port= 8080)
+    app.run()
