@@ -1,0 +1,13 @@
+Dockerfile
+README.md
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.gitignore
+.pytest_cache
+.idea
+.venv
+env_flask
+google-cloud-sdk
+flask_deploy_google_commands.txt

@@ -1,0 +1,10 @@
+# commands used to create server
+./google-cloud-sdk/bin/gcloud init
+
+gcloud builds submit --tag gcr.io/flask-model-tp37-3/home
+gcloud run deploy --image gcr.io/flask-model-tp37-3/home --platform managed
+
+
+getprediction
+
+https://getprediction-ford4aiqbq-ts.a.run.app
