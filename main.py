@@ -4,7 +4,7 @@ Flask_App
 
 Author: Armin Berger
 First created:  06/04/2022
-Last edited:    06/04/2022
+Last edited:    02/05/2022
 
 OVERVIEW:
 This file seeks to deploy a pre-built ML model.
@@ -19,21 +19,37 @@ import sklearn
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 import numpy as np
+
+import torch
+import torch.nn.functional as F
+from transformers import BertTokenizer, BertConfig
+from transformers import AdamW, BertForSequenceClassification, get_linear_schedule_with_warmup
 from flask import Flask, render_template, request
+
+import nltk
+from nltk.stem import PorterStemmer, WordNetLemmatizer
+from nltk.tokenize import word_tokenize, sent_tokenize
+import gensim
+from gensim.utils import simple_preprocess
+
+# libraries for keywords
+from summa import keywords
+import Levenshtein
 
 
 ### CREATE A TFIDF VECTORIZER
 
 # load in the trained vectorizer
-filename = 'vectorizer.pk'
-vectorizer = pickle.load(open(filename, 'rb'))
+filename = 'tokenizer_150k_512_10k_fake'
+tokenizer = BertTokenizer.from_pretrained(filename)
 
 ### LOAD IN MODEL AND GET USER INPUT
 
 # load the model from disk
-filename = 'basic_news_logistic_regression.sav'
-model = pickle.load(open(filename, 'rb'))
+filename = 'model_150k_512_16epoch_10k_fake'
+model = BertForSequenceClassification.from_pretrained(filename)
 
+# collection of stopwords we want to remove from user input text
 stopwords = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", \
              "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", \
              "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", \
@@ -45,39 +61,42 @@ stopwords = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you",
              "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", \
              "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"]
 
+# function which removes keywords that are too similar
+def remove_duplicates(keywords_all):
 
-# function which does further string preprocessing
-def process_string(text):
+    words_drop = []
 
-    # ensure that the text is in string format
-    text = str(text)
+    keywords_all_loop = keywords_all.copy()
 
-    # split the string into individual tokens
-    text_list = text.split(' ')
+    for word in keywords_all:
 
-    # save a list of strings
-    final_string_list = []
+        keywords_all_loop.remove(word)
 
-    for token in text_list:
+        for it_word in keywords_all_loop:
 
-        token = token.lower()
+            sim = Levenshtein.ratio(word, it_word)
 
-        token = token.strip(' ')
+            if sim > 0.5 and word != it_word:
+                words_drop.append(it_word)
 
-        if token not in stopwords:
+    keywords_all = [x for x in keywords_all if x not in set(words_drop)]
 
-            clean_word = ''
+    keywords_all = ', '.join(keywords_all)
 
-            for char in token:
+    return keywords_all
 
-                if char.isalnum():
 
-                    clean_word = clean_word + char
+# Remove stopwords and remove words with 2 or less characters
+def preprocess(text):
 
-            if len(clean_word) > 0:
-                final_string_list.append(clean_word)
+    result = []
+    for token in gensim.utils.simple_preprocess(text):
+        if token not in gensim.parsing.preprocessing.STOPWORDS and len(token) > 2 and token not in stopwords:
+            result.append(token)
 
-    return final_string_list
+    joined_results = ' '.join(result)
+
+    return joined_results
 
 app = Flask(__name__)
 
@@ -93,18 +112,33 @@ def home():
 
     user_news_input = request.form['a']
 
-    # ensure that the user input is in string format
-    if isinstance(user_news_input, str):
+    # pre-process the user input in the same manner as the training data
+    user_news_input_processed = preprocess(user_news_input)
+    user_news_input_vec = tokenizer(user_news_input_processed, padding=True, truncation=True, return_tensors="pt")
 
-        # pre-process the user input in the same manner as the training data
-        user_news_input_processed = process_string(user_news_input)
-        user_news_input_processed = ' '.join(user_news_input_processed)
-        user_news_input_vec = vectorizer.transform([user_news_input_processed])
+    # prediction of our target
+    with torch.no_grad():
 
-        # prediction of our target
-        prediction = model.predict(user_news_input_vec)
+        # make predictions
+        output = model(**user_news_input_vec)
 
-    return render_template('after.html', data=prediction)
+        # using a softmax activation function get discrete predictions
+        predictions = F.softmax(output.logits, dim=1)
+        labels = int(torch.argmax(predictions, dim=1))
+
+        # using a sigmoid function get continues predictions
+        prediction = torch.sigmoid(predictions).tolist()[0]
+        prediction = [round(prediction[0],2),round(prediction[1],2)]
+
+    # turn the given text input into keywords
+    TR_keywords = keywords.keywords(user_news_input_processed, scores=True)
+    top_keywords = [x[0] for x in TR_keywords[0:5]]
+    top_keywords = remove_duplicates(top_keywords)
+
+    # return the final data given to the "after" page
+    pred_tup = prediction + [top_keywords]
+
+    return render_template('after.html', data=pred_tup)
 
 
 if __name__ == "__main__":

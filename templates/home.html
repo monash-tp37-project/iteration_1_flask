@@ -1,35 +1,86 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
         "http://www.w3.org/TR/html4/loose.dtd">
 
-
 <html>
-    <body background='static\img_1.jpeg'>
+<head>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300&display=swap" rel="stylesheet">
+    <script src = 'https://kit.fontawesome.com/fad7ced9d0.js' crossorigin = 'anonymous'></script>
     <style>
+    body{
+        font-family: 'Poppins',sans-serif;
+    }
         .footer {
              text-align: center;
              margin-bottom:0;
 
         }
+        .checkNews{
+        font-size:18px;
+        padding:5px;
+        background: rgba(255, 255, 255, 0.8);
+        outline:none;
+        border:none;
+        width: 230px;
+        height: 60px;
+        align-text:center;
+        font-family: 'Poppins',sans-serif;
+        }
+
+        .checkNews: hover{
+        background: #FFFFFF;
+        }
+
+        input{
+        height: 30px;
+        width: 300px;
+        font-size:15px;
+        border-style:solid;
+        border-width: 0 0 2px 0;
+        background:transparent;
+        outline:none;
+        }
+
+        .mainButton{
+        color: white;
+        position:fixed;
+        top:20px;
+        right: 20px;
+        background: none;
+        border: none;
+        font-size: 18px;
+        outline: none;
+        border:none;
+        align-text:center;
+        }
+
+         body{
+         background-size:cover;
+         }
+
     </style>
+
+</head>
+
+    <body background='static\img_1.jpeg'>
 
         <center>
 
-        <h1 style="font-family:Verdana; color:white; font-size:80px;"> Fake News Detection </h1><br>
+            <a href="http://fakebuster.tk/"><button class = 'mainButton'>
+                <span style = 'font-size:15px'><i class="fa-solid fa-house"></i></span>  Back to Main</button></a>
+
+        <h1 style="color:white; font-size:80px;"> Fake News Detection </h1><br>
 
         <form method="POST", action="{{url_for('home')}}">
-           <b style="font-family:Verdana; color:white; font-size:25px;">
-               Please input your news text:  <input type="text", name='a', placeholder=" this is my news "> <br><br>
-
+           <b style="color:white; font-size:25px;">
+               Input your news text<br><br>
+               <input type="text", name='a', placeholder=" this is my news "> <br><br>
            </b>
-            <input type="submit" , value='Check news!' >
+            <button class = 'checkNews'>Check news <i class="fa-solid fa-circle-check"></i></button>
         </form>
 
-        </center>
+        <h1 style="color:white; font-size30px;"> Give the model at least three paragraphs of text for reliable results. </h1><br>
 
-    <div class = 'footer'>
-        <br><br>
-            <p><a style=" font-family:Verdana; color:white; font-size:15px;" href="http://fakebuster.tk/"> Go back to the main page </a></p>
-    </div>
+        </center>
 
     </body>
 </html>
