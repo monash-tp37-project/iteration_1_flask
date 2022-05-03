@@ -1,10 +1,36 @@
+### This is a manual/ summary of how to beploy a flask app on google ###
+
+
+Project name
+flask-model-tp37-4
+Project number
+689209393021
+Project ID
+flask-model-tp37-4
+
+
+
 # commands used to create server
 ./google-cloud-sdk/bin/gcloud init
 
-gcloud builds submit --tag gcr.io/flask-model-tp37-3/home
-gcloud run deploy --image gcr.io/flask-model-tp37-3/home --platform managed
+gcloud builds submit --tag gcr.io/flask-model-tp37-4/home
+gcloud run deploy --image gcr.io/flask-model-tp37-4/home --platform managed
 
 
 getprediction
 
+10
+
 https://getprediction-ford4aiqbq-ts.a.run.app
+
+
+
+
+### ERROR MESSAGE
+
+Deployment failed                                                                                                                      
+ERROR: (gcloud.run.deploy) Cloud Run error: The user-provided container failed to start and listen on the port defined provided by the PORT=8080 environment variable. Logs for this revision might contain more information.
+
+Logs URL: https://console.cloud.google.com/logs/viewer?project=flask-model-tp37-3&resource=cloud_run_revision/service_name/getprediction/revision_name/getprediction-00001-fih&advancedFilter=resource.type%3D%22cloud_run_revision%22%0Aresource.labels.service_name%3D%22getprediction%22%0Aresource.labels.revision_name%3D%22getprediction-00001-fih%22
+For more troubleshooting guidance, see https://cloud.google.com/run/docs/troubleshooting#container-failed-to-start
+(base) arminberger@dyn-118-138-42-113 iteration_1_flask % 

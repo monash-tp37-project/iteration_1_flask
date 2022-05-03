@@ -14,25 +14,13 @@ the news is reliable or not.
 '''
 
 # import the required packages
-import pickle
-import sklearn
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
-import numpy as np
-
 import torch
 import torch.nn.functional as F
-from transformers import BertTokenizer, BertConfig
-from transformers import AdamW, BertForSequenceClassification, get_linear_schedule_with_warmup
+from transformers import BertTokenizer
+from transformers import BertForSequenceClassification
 from flask import Flask, render_template, request
-
-import nltk
-from nltk.stem import PorterStemmer, WordNetLemmatizer
-from nltk.tokenize import word_tokenize, sent_tokenize
-import gensim
-from gensim.utils import simple_preprocess
-
 # libraries for keywords
+import gensim
 from summa import keywords
 import Levenshtein
 
@@ -139,7 +127,6 @@ def home():
     pred_tup = prediction + [top_keywords]
 
     return render_template('after.html', data=pred_tup)
-
 
 if __name__ == "__main__":
     app.run(debug=True)
